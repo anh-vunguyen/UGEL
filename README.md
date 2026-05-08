@@ -10,4 +10,4 @@
 </div>
 
 ## Updates
-- [May 8 2026] We are currently cleaning and optimising the code for enhancing the readability. All code will be published soon.
+- [May 8 2026] We are currently cleaning and optimising the code to enhance readability. All code will be published soon.
