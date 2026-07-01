@@ -10,4 +10,7 @@
 </div>
 
 ## Updates
+
+- [July 1 2026] All refactored files have been added. We are working on cleaning up the environment and preparing a new README file with instructions on how to set it up and use it.
+
 - [Jun 4 2026] A poster has been added. We are still cleaning and optimising the code to enhance readability. All code will be published soon. (We sincerely apologise for the delay, as most of our resources and time are currently focused on the 2 following projects.)
