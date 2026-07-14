@@ -36,7 +36,7 @@ pip install -r requirements.txt
 ```
 An example for running UGEL:
 ```bash
-python run_reg_indtest.py --model beta_mobilenetv3_semi_supervised --lr 0.001 --nQuery 6 --nStart 12 --nEnd 600 --train_path "data/CloudSEN12_128" --test_path "data/CloudSEN12_test128"" --data CloudSEN12_128 --alg uncertain_al_confident_ssl 
+python run_reg_indtest.py --model beta_mobilenetv3_semi_supervised --lr 0.001 --nQuery 6 --nStart 12 --nEnd 600 --train_path "data/CloudSEN12_128" --test_path "data/CloudSEN12_test128" --data CloudSEN12_128 --alg uncertain_al_confident_ssl 
 ``` 
 
 ## Acknowledgements
