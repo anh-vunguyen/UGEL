@@ -63,7 +63,6 @@ parser.add_argument('--deterministic', default=False, action='store_true', help=
 parser.add_argument('--embs', default="grad_embs", help="whether to use gradient embeddings (grad_embs) or penultimate layer embeddings (penultimate).", type=str)
 parser.add_argument('--stream_sampler_early_stop', default=False, action='store_true')
 parser.add_argument('--model', help='model - resnet or mlp or cloudscout', type=str, default='mlp')
-parser.add_argument('--path', help='data path', type=str, default='data')
 parser.add_argument('--data', help='dataset' , type=str, default='')
 parser.add_argument('--nQuery', help='number of points to query in a batch', type=int, default=100)
 parser.add_argument('--nStart', help='number of points to start', type=int, default=0)
@@ -192,9 +191,6 @@ args_pool['CIFAR10']['transform'] =  args_pool['CIFAR10']['transformTest'] # rem
 args_pool['MNIST']['transformTest'] = args_pool['MNIST']['transform']
 args_pool['SVHN']['transformTest'] = args_pool['SVHN']['transform']
 
-if not os.path.exists(opts.path):
-    os.makedirs(opts.path)
-
 if not opts.use_load_otf:
     if opts.data == 'CloudL9':  # RSRC-L9
         cloud_threshold = 0.7 # obsoleted because we pivoted to regression
@@ -212,21 +208,23 @@ if not opts.use_load_otf:
         n_pool = len(cloud_train)
         n_test = len(cloud_test)
     elif opts.data == 'CloudS2': # RSRC-S2
-        assert os.path.exists(opts.path), f"{opts.path} does not exist."
-        file_list = np.array(os.listdir(opts.path))
+        assert os.path.exists(opts.train_path), f"{opts.train_path} does not exist."
+        assert os.path.exists(opts.test_path), f"{opts.test_path} does not exist."
+        file_list = np.array(os.listdir(opts.train_path))
         cloud_threshold = 0.7
         train_ids = np.arange(20000)
         print(train_ids)
         test_ids = np.arange(20000, 30000)
         print(test_ids)
         handler = get_handler(opts.data)
-        cloud_train = CloudS2(train_ids, opts.path, two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
-        cloud_test = CloudS2(test_ids, opts.path, cloud_threshold=cloud_threshold) 
+        cloud_train = CloudS2(train_ids, opts.train_path, two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
+        cloud_test = CloudS2(test_ids, opts.test_path, cloud_threshold=cloud_threshold) 
         n_pool = len(cloud_train)
         n_test = len(cloud_test)
     elif opts.data == "CloudL9_128": # 128 x 128``
-        assert os.path.exists(opts.path), f"{opts.path} does not exist."
-        file_list = np.array(os.listdir(opts.path))
+        assert os.path.exists(opts.train_path), f"{opts.train_path} does not exist."
+        assert os.path.exists(opts.test_path), f"{opts.test_path} does not exist."
+        file_list = np.array(os.listdir(opts.train_path))
         cloud_threshold = 0.7
         # all_idxs = np.load('/data/betaU_train.npy')
         # all_idxs = np.load('/data/negative_skew_train.npy')
@@ -252,17 +250,17 @@ if not opts.use_load_otf:
         # test_ids = np.load('/data/symmetric_test.npy')
         test_ids = np.load('./data/normal_test_sigma015.npy')
         # test_ids = np.load('/data/normal_test_loc03_sigma015.npy')
-        cloud_test_path = "/hpcfs/users/a1872455/data/CloudL9_ind_test128"
+        cloud_test_path = opts.test_path
         handler = get_handler(opts.data)
-        cloud_train = CloudL9(train_ids, opts.path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
+        cloud_train = CloudL9(train_ids, opts.train_path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
         cloud_test = CloudL9(test_ids, cloud_test_path, img_shape=(3, 128, 128), cloud_threshold=cloud_threshold) 
         n_pool = len(cloud_train)
         n_test = len(cloud_test)
     elif opts.data == "CloudS2_128":
-        assert os.path.exists(opts.path), f"{opts.path} does not exist."
+        assert os.path.exists(opts.train_path), f"{opts.train_path} does not exist."
         assert os.path.exists(opts.test_path), f"{opts.test_path} does not exist."
         
-        file_list = np.array(os.listdir(opts.path))
+        file_list = np.array(os.listdir(opts.train_path))
         cloud_threshold = 0.7
         all_idxs = np.arange(16000)
         nb_train = 16000
@@ -278,7 +276,7 @@ if not opts.use_load_otf:
         idxs_lb = np.zeros(nb_train, dtype=bool)
         idxs_lb[:NUM_INIT_LB] = True # First 100 frames
         print(train_ids[:NUM_INIT_LB])
-        cloud_train = CloudS2(train_ids, opts.path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
+        cloud_train = CloudS2(train_ids, opts.train_path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
         
         print("Independent testing")
         test_ids = np.arange(8000)
@@ -289,9 +287,9 @@ if not opts.use_load_otf:
         n_pool = len(cloud_train)
         n_test = len(cloud_test)
     elif opts.data == "CloudL8_128":
-        assert os.path.exists(opts.path), f"{opts.path} does not exist."
+        assert os.path.exists(opts.train_path), f"{opts.train_path} does not exist."
         assert os.path.exists(opts.test_path), f"{opts.test_path} does not exist."
-        file_list = np.array(os.listdir(opts.path))
+        file_list = np.array(os.listdir(opts.train_path))
         cloud_threshold = 0.7
         all_idxs = np.arange(20294)
         np.random.shuffle(all_idxs)
@@ -310,13 +308,13 @@ if not opts.use_load_otf:
         test_path = opts.test_path
         
         handler = get_handler(opts.data)
-        cloud_train = CloudL9(train_ids, opts.path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
+        cloud_train = CloudL9(train_ids, opts.train_path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
         cloud_test = CloudL9(test_ids, test_path, img_shape=(3, 128, 128), cloud_threshold=cloud_threshold) 
         n_pool = len(cloud_train)
     elif opts.data == "CloudSEN12_128":
-        assert os.path.exists(opts.path), f"{opts.path} does not exist."
+        assert os.path.exists(opts.train_path), f"{opts.train_path} does not exist."
         assert os.path.exists(opts.test_path), f"{opts.test_path} does not exist."
-        file_list = np.array(os.listdir(opts.path))
+        file_list = np.array(os.listdir(opts.train_path))
         cloud_threshold = 0.7 # Not in used
         all_idxs = np.arange(80000)
         np.random.shuffle(all_idxs)
@@ -333,14 +331,14 @@ if not opts.use_load_otf:
         test_path = opts.test_path
 
         handler = get_handler(opts.data)
-        cloud_train = CloudL9(train_ids, opts.path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
-        cloud_test = CloudL9(test_ids, test_path, img_shape=(3, 128, 128), cloud_threshold=cloud_threshold) 
+        cloud_train = CloudL9(train_ids, opts.train_path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
+        cloud_test = CloudL9(test_ids, opts.test_path, img_shape=(3, 128, 128), cloud_threshold=cloud_threshold) 
         n_pool = len(cloud_train)
         n_test = len(cloud_test)
     elif opts.data == "LandCoverAI_128":
-        assert os.path.exists(opts.path), f"{opts.path} does not exist."
+        assert os.path.exists(opts.train_path), f"{opts.train_path} does not exist."
         assert os.path.exists(opts.test_path), f"{opts.test_path} does not exist."
-        file_list = np.array(os.listdir(opts.path))
+        file_list = np.array(os.listdir(opts.train_path))
         cloud_threshold = 0.7 # Not in used
         
         all_idxs = np.arange(154056) 
@@ -363,15 +361,16 @@ if not opts.use_load_otf:
         
         
         handler = get_handler(opts.data)
-        cloud_train = CloudL9(train_ids, opts.path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
-        cloud_test = CloudL9(test_ids, test_path, img_shape=(3, 128, 128), cloud_threshold=cloud_threshold) 
+        cloud_train = CloudL9(train_ids, opts.train_path, img_shape=(3, 128, 128), two_stage_training=opts.use_two_stage_training, cloud_threshold=cloud_threshold) 
+        cloud_test = CloudL9(test_ids, opts.test_path, img_shape=(3, 128, 128), cloud_threshold=cloud_threshold) 
         n_pool = len(cloud_train)
         n_test = len(cloud_test)
     else:
         raise NotImplementedError
         
 args = args_pool[DATA_NAME]
-args['path'] = opts.path
+args['train_path'] = opts.train_path
+args['test_path'] = opts.test_path
 args['nClasses'] = opts.nClasses # Updated Jun 18
 args['lr'] = opts.lr
 args['train_acc'] = opts.train_acc

@@ -58,6 +58,5 @@ torchsummary==1.5.1
 torchvision==0.14.1+cu116
 typing_extensions==4.10.0
 tzdata==2024.1
-uci_datasets @ git+https://github.com/treforevans/uci_datasets.git@f0737523712fe66a1640e4b980b927e8490b58eb
 urllib3==2.2.1
 zipp==3.18.1

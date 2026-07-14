@@ -18,7 +18,7 @@ from CloudS2_dataset import CloudS2
 from losses import Gaussian_NLL, EvidentialRegressionLoss, Beta_NLL
 logger = logging.getLogger(__name__)
 
-
+# Uncertainty-Guided Edge Learning
 class Uncertain_AL_Confident_SSL(StrategyOTF):
     def __init__(self, dataset, idxs_lb, net, handler, args, nb_inferences=10, window_size=100):
         super(Uncertain_AL_Confident_SSL, self).__init__(dataset, idxs_lb, net, handler, args)
